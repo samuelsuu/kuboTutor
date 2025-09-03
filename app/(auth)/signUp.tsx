@@ -76,7 +76,7 @@ const signUp = () => {
       if (userExists) {
         Alert.alert(
           "Error",
-          "An account with this phone number already exists"
+          "An account with this phone number already exists pls try another"
         );
         setIsLoading(false);
         return;

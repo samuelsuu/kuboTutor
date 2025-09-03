@@ -10,7 +10,7 @@ import {
 import React from "react";
 import images from "@/constants/images";
 import { icons } from "@/constants/images";
-import AntDesign from "@expo/vector-icons/AntDesign";
+// import AntDesign from "@expo/vector-icons/AntDesign";
 
 const forgetPassword = () => {
   return (

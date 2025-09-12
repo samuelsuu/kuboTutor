@@ -1,46 +1,50 @@
+// app/CryptoList.tsx
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  RefreshControl,
+  StyleSheet,
+  Image,
+} from "react-native";
 import axios from "axios";
-import React, { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
-import {  } from "react-native-gesture-handler";
 
-interface Coin{
+interface Coin {
   id: string;
   name: string;
   symbol: string;
   current_price: number;
-  price_change_pencentage_24h: number;
+  price_change_percentage_24h: number;
   image: string;
 }
 
-const Finance = () => {
-  const [coin, setCoin] = useState<Coin[]>([]);
-  const [filteredCoins, setFilteredCoins] =  useState<Coin[]>([]);
+const CryptoList = () => {
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
-
-  //fetch coin from coingecko api
-  const fetchCoins = async() => {
-    try{
-    const response = await axios.get(
-      " http://api.coingecko.com/api/v3/coins/markets",
-
-      {
-        params: {
-          vs_currency: "usd",
-          order: "market_cap_desc",
-          per_page: 100,
-          page: 1,
-          sparkline: false,
-          price_change_percentage: "24h",
-      },
-      }
-    );
-
-     setCoin(response.data);
-     setFilteredCoins(response.data);
-    }catch(error){
-      console.log("error fetching coins", error);
+  // Fetch coins from CoinGecko API
+  const fetchCoins = async () => {
+    try {
+      const response = await axios.get(
+        "https://api.coingecko.com/api/v3/coins/markets",
+        {
+          params: {
+            vs_currency: "usd",
+            order: "market_cap_desc",
+            per_page: 20,
+            page: 1,
+            sparkline: false,
+          },
+        }
+      );
+      setCoins(response.data);
+      setFilteredCoins(response.data);
+    } catch (error) {
+      console.error("Error fetching coins:", error);
     }
   };
 
@@ -48,68 +52,104 @@ const Finance = () => {
     fetchCoins();
   }, []);
 
-  // search filter
+  // Search filter
   const handleSearch = (text: string) => {
     setSearch(text);
-    const results = coin.filter((c) =>
-      c.name.toLowerCase().includes(text.toLowerCase()) ||
-      c.symbol.toLowerCase().includes(text.toLowerCase())
+    const results = coins.filter((coin) =>
+      coin.name.toLowerCase().includes(text.toLowerCase())
     );
     setFilteredCoins(results);
   };
 
-  // pull to refresh
-  const onRrefresh = async () => {
+  // Pull-to-refresh
+  const onRefresh = async () => {
     setRefreshing(true);
     await fetchCoins();
     setRefreshing(false);
   };
 
-  // Render each coin item
-  const renderCoin = ({item}: {item: Coin}) => {
-    const priceChange = item.price_change_pencentage_24h;
+  // Render each coin row
+  const renderItem = ({ item }: { item: Coin }) => {
+    const priceChange = item.price_change_percentage_24h;
     const priceColor = priceChange > 0 ? "green" : "red";
 
     return (
-      <View>
-        <Image source={{ uri: item.image }} style={{ width: 32, height: 32 }} />
-
-        <View>
-          <Text>{item.name}</Text>
-          <Text>{item.symbol.toUpperCase()}</Text>
+      <View style={styles.coinRow}>
+        <Image source={{ uri: item.image }} style={styles.coinImage} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.coinName}>{item.name}</Text>
+          <Text style={styles.coinSymbol}>{item.symbol.toUpperCase()}</Text>
         </View>
-
-        <View>
-          <Text>${item.current_price}</Text>
-          <Text style={{ color: priceColor }}>{priceChange.toFixed(2)}%</Text>
+        <View style={{ alignItems: "flex-end" }}>
+          <Text style={styles.coinPrice}>${item.current_price}</Text>
+          <Text style={{ color: priceColor }}>
+            {priceChange.toFixed(2)}%
+          </Text>
         </View>
       </View>
     );
   };
 
   return (
-    <View>
-      <Text>finance</Text>
-
+    <View style={styles.container}>
+      {/* Search bar */}
       <TextInput
-        placeholder="Search by name or symbol"
+        style={styles.searchInput}
+        placeholder="Search coin..."
         value={search}
         onChangeText={handleSearch}
       />
 
-      {/* coin list */}
+      {/* Coin list */}
       <FlatList
         data={filteredCoins}
         keyExtractor={(item) => item.id}
-        renderItem={renderCoin}
+        renderItem={renderItem}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRrefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
     </View>
   );
-}
+};
 
-export default Finance
+export default CryptoList;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 12,
+  },
+  coinRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  coinImage: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+  },
+  coinName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  coinSymbol: {
+    color: "gray",
+    fontSize: 12,
+  },
+  coinPrice: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});

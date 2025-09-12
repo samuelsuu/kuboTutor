@@ -8,6 +8,7 @@ import {
   RefreshControl,
   StyleSheet,
   Image,
+  ScrollView,
 } from "react-native";
 import axios from "axios";
 
@@ -82,16 +83,14 @@ const CryptoList = () => {
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Text style={styles.coinPrice}>${item.current_price}</Text>
-          <Text style={{ color: priceColor }}>
-            {priceChange.toFixed(2)}%
-          </Text>
+          <Text style={{ color: priceColor }}>{priceChange.toFixed(2)}%</Text>
         </View>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Search bar */}
       <TextInput
         style={styles.searchInput}
@@ -101,15 +100,16 @@ const CryptoList = () => {
       />
 
       {/* Coin list */}
-      <FlatList
-        data={filteredCoins}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
-    </View>
+      
+        <FlatList
+          data={filteredCoins}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+      </ScrollView>
   );
 };
 
